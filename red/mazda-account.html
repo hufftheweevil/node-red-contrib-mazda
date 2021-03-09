@@ -1,0 +1,45 @@
+<script type="text/javascript">
+  RED.nodes.registerType('mazda-account', {
+    category: 'config',
+    defaults: {
+      email: { type: 'text' },
+      region: { default: 'MNAO', required: true }
+    },
+    credentials: {
+      password: { type: 'password' }
+    },
+    label: function () {
+      return this.email
+    }
+  })
+</script>
+
+<script type="text/html" data-template-name="mazda-account">
+  <div class="form-row">
+    <label for="node-config-input-email"><i class="fa fa-id-card"></i> Email</label>
+    <input type="text" id="node-config-input-email" />
+  </div>
+  <div class="form-row">
+    <label for="node-config-input-password"><i class="fa fa-lock"></i> Password</label>
+    <input type="password" id="node-config-input-password" />
+  </div>
+  <div class="form-row">
+    <label for="node-config-input-region"><i class="fa fa-globe"></i> Region</label>
+    <select id="node-config-input-region">
+      <option value="MNAO">North America</option>
+      <option value="MME">Europe</option>
+      <option value="MJO">Japan</option>
+    </select>
+  </div>
+</script>
+
+<script type="text/html" data-help-name="mazda-account">
+  <p>
+    <b>Notice:</b> The MyMazda API only allows one active session at a time. Therefore, if you use
+    the same account with both Node-RED and the MyMazda mobile app, you may experience issues
+    ("Multiple devices detected" notifications, session expired warnings, etc.) To fix this, you can
+    create a secondary MyMazda account, and share your vehicle with the secondary account. Log in to
+    the mobile app using the primary account and select Menu > MyMazda > My Vehicle > Drivers >
+    Manage Drivers > Invite Driver. When finished, log into the secondary account with Node-RED.
+  </p>
+</script>

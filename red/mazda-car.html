@@ -1,0 +1,135 @@
+<script type="text/javascript">
+  RED.nodes.registerType('mazda-car', {
+    category: 'devices',
+    defaults: {
+      account: { value: '', required: true, type: 'mazda-account' },
+      vehicle: { required: false },
+      name: { required: false }
+    },
+    color: '#D4493E',
+    inputs: 1,
+    outputs: 1,
+
+    icon: 'font-awesome/fa-car',
+    label: function () {
+      return this.name || 'mazda'
+    },
+    labelStyle: function () {
+      return this.name ? 'node_label_italic' : ''
+    },
+    oneditprepare: function () {
+      let initVal = this.vehicle
+
+      function updateVehicleList(refetch) {
+        let input = $('#node-input-vehicle')
+
+        input.empty()
+
+        let account = RED.nodes.node($('#node-input-account').val())
+
+        if (account?.email) {
+          $.getJSON('mazda-client/vehicles', { email: account.email, refetch })
+            .done(function (data, status) {
+              // No data returned
+              if (!data || data.length <= 0) {
+                RED.notify('No vehicles found', 'error')
+                return
+              }
+
+              data.sort((a, b) =>
+                (a.nickname || a.modelName).localeCompare(b.nickname || b.modelName)
+              )
+
+              // Re-generate select input
+              input
+                .append(
+                  data.map(vehicle =>
+                    $('<option>')
+                      .val(vehicle.id)
+                      .text(vehicle.nickname || vehicle.modelName)
+                  )
+                )
+                .val(initVal)
+            })
+            .fail(function (err) {
+              RED.notify(err.responseText, 'error')
+            })
+        }
+      }
+
+      updateVehicleList()
+
+      $('#node-button-refresh-vehicles').click(() => updateVehicleList(true))
+
+      $('#node-input-account').change(() => updateVehicleList())
+    }
+  })
+</script>
+
+<script type="text/html" data-template-name="mazda-car">
+  <div class="form-row">
+    <label for="node-input-account"><i class="fa fa-id-card"></i> Account</label>
+    <input type="text" id="node-input-account" />
+  </div>
+  <div class="form-row">
+    <label for="node-input-vehicle"><i class="fa fa-car"></i> Vehicle</label>
+    <div style="display: inline-block; position: relative; width: 70%; height: 20px;">
+      <select id="node-input-vehicle" style="width: calc(100% - 40px)"></select>
+      <a
+        id="node-button-refresh-vehicles"
+        class="red-ui-button"
+        style="position: absolute; right: 0px; top: 0px;"
+        ><i class="fa fa-refresh"></i
+      ></a>
+    </div>
+  </div>
+  <div class="form-row">
+    <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+    <input type="text" id="node-input-name" />
+  </div>
+</script>
+
+<script type="text/html" data-help-name="mazda-car">
+  <p>Interact with a Mazda Connected Services vehicle</p>
+  <h3>Input</h3>
+  <dl class="message-properties">
+    <dt class="required"><code>payload</code> <span class="property-type">string</span></dt>
+    <dd>
+      Must be one of the following strings:
+      <ul>
+        <li>
+          <code>getInfo</code> - Retrieves identifying information about the vehicle and sends to
+          output (See
+          <a href="https://github.com/bdr99/node-mymazda#get-list-of-vehicles">API docs</a> for
+          details)
+          <br />
+          <span style="font-size: small; font-style: italic">
+            Optionally set <code>options.refetch</code> to <code>true</code> to force the client to
+            request the vehicle info from the account. Otherwise, the cache is used.
+          </span>
+        </li>
+        <li>
+          <code>getStatus</code> - Retrieves status of the vehicle and sends to output (See
+          <a href="https://github.com/bdr99/node-mymazda#get-vehicle-status">API docs</a> for
+          details)
+        </li>
+        <li>
+          <code>startPolling</code> - Begins polling using the <code>getStatus</code> command
+          <br />
+          <span style="font-size: small; font-style: italic">
+            Optionally set <code>options.interval</code> to a number of seconds greater than 10
+          </span>
+        </li>
+        <li><code>stopPolling</code> - Ends polling</li>
+        <li><code>startEngine</code> - Starts vehicle</li>
+        <li>
+          <code>stopEngine</code> - Stops vehicle (only if started via Mazda Connected Services)
+        </li>
+        <li><code>lockDoors</code> - Locks all doors</li>
+        <li><code>unlockDoors</code> - Unlocks all doors</li>
+        <li><code>turnHazardLightsOn</code> - Turns on hazard lights</li>
+        <li><code>turnHazardLightsOff</code> - Turns off hazard lights</li>
+      </ul>
+    </dd>
+  </dl>
+</script>
