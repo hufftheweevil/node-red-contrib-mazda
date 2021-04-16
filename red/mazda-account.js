@@ -21,7 +21,7 @@ module.exports = function (RED) {
         // Gets vehicles and stores in cache
         this.vehicles = await this.client.getVehicles()
       } catch (err) {
-        node.error(err)
+        this.error(err)
       }
     }
 
