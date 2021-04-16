@@ -63,8 +63,12 @@ module.exports = function (RED) {
     })
 
     async function getStatus(passMsg = {}) {
-      let status = await client.getVehicleStatus(vehicleId)
-      node.send({ ...passMsg, topic: 'status', payload: status })
+      try {
+        let status = await client.getVehicleStatus(vehicleId)
+        node.send({ ...passMsg, topic: 'status', payload: status })
+      } catch (err) {
+        node.error(err)
+      }
     }
 
     node.on('close', removed => {

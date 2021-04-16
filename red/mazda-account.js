@@ -17,8 +17,12 @@ module.exports = function (RED) {
     Accounts.set(config.email, this)
 
     this.listVehicles = async () => {
-      // Gets vehicles and stores in cache
-      this.vehicles = await this.client.getVehicles()
+      try {
+        // Gets vehicles and stores in cache
+        this.vehicles = await this.client.getVehicles()
+      } catch (err) {
+        node.error(err)
+      }
     }
 
     // Get list of vehicles
